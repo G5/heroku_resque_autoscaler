@@ -2,5 +2,112 @@ require 'spec_helper'
 require 'heroku_resque_autoscaler'
 require 'heroku_resque_autoscaler/scaler'
 
-describe HerokuResqueAutoscaler::Scaler do
+require "spec_helper"
+
+class HerokuResqueAutoscalerTestClass
+  extend HerokuResqueAutoscaler
+end
+
+describe HerokuResqueAutoscaler do
+  before :each do
+    @heroku = mock(Heroku::API)
+    HerokuResqueAutoscaler::Scaler.class_variable_set(:@@heroku, @heroku)
+  end
+
+  let(:heroku_app) {ENV['HEROKU_APP_NAME']}
+
+  context "#workers" do
+    it "returns the number of workers from the Heroku application" do
+      @heroku.should_receive(:get_ps).with(heroku_app).and_return([
+        {"process" => "web.1"},
+        {"process" => "worker.1"},
+        {"process" => "worker.1"},
+      ])
+      HerokuResqueAutoscaler::Scaler.workers.should == 2
+    end
+  end
+
+  context "#workers=" do
+    it "sets the number of workers on Heroku to some quantity" do
+      quantity = 10
+      @heroku.should_receive(:post_ps_scale).with(heroku_app, :worker, quantity)
+      HerokuResqueAutoscaler::Scaler.workers = quantity
+    end
+  end
+
+  context "#job_count" do
+    it "returns the Resque job count" do
+      num_pending = 10
+      Resque.should_receive(:info).and_return({:pending => num_pending})
+      HerokuResqueAutoscaler::Scaler.job_count.should == num_pending
+    end
+  end
+
+  context "#num_desired_heroku_workers" do
+    it "returns the number of workers we should have (1 worker per x jobs)" do
+      num_jobs = 100
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_jobs)
+      HerokuResqueAutoscalerTestClass.num_desired_heroku_workers.should == 5 
+
+      num_jobs = 38
+      HerokuResqueAutoscaler::Scaler.unstub(:job_count)
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_jobs)
+      HerokuResqueAutoscalerTestClass.num_desired_heroku_workers.should == 3
+
+      num_jobs = 1
+      HerokuResqueAutoscaler::Scaler.unstub(:job_count)
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_jobs)
+      HerokuResqueAutoscalerTestClass.num_desired_heroku_workers.should == 1 
+
+      num_jobs = 10000
+      HerokuResqueAutoscaler::Scaler.unstub(:job_count)
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_jobs)
+      HerokuResqueAutoscalerTestClass.num_desired_heroku_workers.should == 5
+    end
+  end
+
+  context "#after_perform_scale_down" do
+    it "scales down the workers to zero if there are no jobs pending" do
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(0)
+      HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(1)
+      HerokuResqueAutoscaler::Scaler.stub(:working_job_count).and_return(1)
+      HerokuResqueAutoscaler::Scaler.should_receive(:workers=).with(0)
+      HerokuResqueAutoscalerTestClass.after_perform_scale_down
+    end
+
+    it "does not scale down the workers if there are jobs pending" do
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(1)
+      HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=)
+      HerokuResqueAutoscalerTestClass.after_perform_scale_down
+    end
+  end
+
+  context "#after_enqueue_scale_up" do
+    it "ups the amount of workers if there are not enough" do
+      num_workers = 5
+      num_desired_workers = 6
+      HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(num_workers)
+      HerokuResqueAutoscalerTestClass.stub(:num_desired_heroku_workers).and_return(num_desired_workers)
+      HerokuResqueAutoscaler::Scaler.should_receive(:workers=).with(num_desired_workers)
+      HerokuResqueAutoscalerTestClass.after_enqueue_scale_up
+    end
+
+    it "does not change the amount of workers if there more workers than needed" do
+      num_workers = 6
+      num_desired_workers = 5
+      HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(num_workers)
+      HerokuResqueAutoscalerTestClass.stub(:num_desired_heroku_workers).and_return(num_desired_workers)
+      HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=)
+      HerokuResqueAutoscalerTestClass.after_enqueue_scale_up
+    end
+
+    it "does not change the amount of workers if there are exactly the number required" do
+      num_workers = 6
+      num_desired_workers = 6
+      HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(num_workers)
+      HerokuResqueAutoscalerTestClass.stub(:num_desired_heroku_workers).and_return(num_desired_workers)
+      HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=)
+      HerokuResqueAutoscalerTestClass.after_enqueue_scale_up
+    end
+  end
 end
