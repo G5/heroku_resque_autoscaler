@@ -4,6 +4,7 @@ require "resque"
 module HerokuResqueAutoscaler
   module Scaler
     class << self
+      # TODO: use HerokuResqueAutoscaler.configuration for api_key
       @@heroku = Heroku::API.new(api_key: ENV["HEROKU_API_KEY"])
 
       def api_key
@@ -15,7 +16,7 @@ module HerokuResqueAutoscaler
       end
 
       def workers
-        @@heroku.get_ps(app_name).keep_if do |ps|
+        @@heroku.get_ps(app_name).body.keep_if do |ps|
           ps["process"] =~ /worker/
         end.length.to_i
       end
