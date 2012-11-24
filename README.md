@@ -2,6 +2,10 @@
 
 Uses Resque Job Hooks and the Heroku API gem to autoscale Heroku Resque workers
 
+Inspired by [@darkhelmet](https://github.com/darkhelmet)'s
+[Auto-scale Your Resque Workers On Heroku](http://verboselogging.com/2010/07/30/auto-scale-your-resque-workers-on-heroku)
+
+
 ## Current Version
 
 0.0.1
