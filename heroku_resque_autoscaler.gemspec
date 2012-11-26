@@ -8,15 +8,15 @@ Gem::Specification.new do |gem|
   gem.email         = ["jlsuttles@gmail.com"]
   gem.description   = %q{Uses Resque Job Hooks and the Heroku API gem to autoscale Heroku Resque workers}
   gem.summary       = %q{Uses Resque Job Hooks and the Heroku API gem to autoscale Heroku Resque workers}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/G5/heroku_resque_autoscaler"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_runtime_dependency "heroku-api", "~> 0.3.5"
-  gem.add_runtime_dependency "resque", "~> 1.23.0"
+  gem.add_dependency "heroku-api", "~> 0.3.5"
+  gem.add_dependency "resque", "~> 1.23.0"
   
   gem.add_development_dependency "rspec", "~> 2.11.0"
   gem.add_development_dependency "guard-rspec", "~> 2.1.0"
