@@ -11,18 +11,25 @@ end
 describe HerokuResqueAutoscaler do
   before :each do
     @heroku = mock(Heroku::API)
-    HerokuResqueAutoscaler::Scaler.class_variable_set(:@@heroku, @heroku)
+    HerokuResqueAutoscaler::Scaler.stub(:heroku).and_return(@heroku)
   end
 
   let(:heroku_app) {ENV['HEROKU_APP_NAME']}
 
   context "#workers" do
     it "returns the number of workers from the Heroku application" do
-      @heroku.should_receive(:get_ps).with(heroku_app).and_return([
-        {"process" => "web.1"},
-        {"process" => "worker.1"},
-        {"process" => "worker.1"},
-      ])
+      Excon.stub(method: :get) do |params|
+        { status: 200,
+          body: [
+            {"process" => "web.1"},
+            {"process" => "worker.1"},
+            {"process" => "worker.2"},
+          ]
+        }
+      end
+      connection = Excon.new("http://example.com", mock: true)
+      response = connection.request(method: :get)
+      @heroku.should_receive(:get_ps).with(heroku_app).and_return(response)
       HerokuResqueAutoscaler::Scaler.workers.should == 2
     end
   end
