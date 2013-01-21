@@ -94,6 +94,22 @@ rspec spec
 ```
 
 
+## Coverage
+
+```bash
+rspec spec
+open coverage/index.html
+```
+
+## Releases
+
+```bash
+vi lib/heroku_resque_autoscaler/version.rb # change version
+vi README.md # change version
+rake release
+```
+
+
 ## License
 
 Copyright (c) 2012 G5
