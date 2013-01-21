@@ -35,18 +35,10 @@ module HerokuResqueAutoscaler
 
     # Returns a hash of all configurable options merged with +hash+
     #
-    # @param [Hash] hash A set of configuration options that will take 
+    # @param [Hash] hash A set of configuration options that will take
     # precedence over the defaults
     def merge(hash)
       to_hash.merge(hash)
-    end
-
-    def validate_presence(options)
-      OPTIONS.each_pair do |key, value|
-        if options[key].nil?
-          raise HerokuResqueAutoscaler::ConfigurationException, "#{key} is missing"
-        end
-      end
     end
   end
 end
