@@ -1,5 +1,7 @@
 # Heroku Resque Autoscaler
 
+[![Code Climate](https://codeclimate.com/github/G5/heroku_resque_autoscaler.png)](https://codeclimate.com/github/G5/heroku_resque_autoscaler)
+
 Uses Resque Job Hooks and the Heroku API gem to autoscale Heroku Resque workers
 
 Inspired by [@darkhelmet](https://github.com/darkhelmet)'s
