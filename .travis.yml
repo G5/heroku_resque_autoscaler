@@ -1,4 +1,8 @@
 language: ruby
 rvm:
-  - "1.9.3"
+- 1.9.3
 script: bundle exec rspec spec
+notifications:
+  campfire:
+    rooms:
+      secure: RDYRySh76nHSmVzZ114QSWIuzlDUDJedfLGTRBDWlbQF51BjeqXZPcc2IPvRTXsjBrmdUYau0TfyXfjU0nRnKxooeN8OCHoDKcNuLpCpLtkMfSHiySssKmVbGwba/pwPJGs4qCWCNecmXadttJv84OH8X5f7GkL8Ago147uiizU=
