@@ -6,3 +6,5 @@ notifications:
   campfire:
     rooms:
       secure: RDYRySh76nHSmVzZ114QSWIuzlDUDJedfLGTRBDWlbQF51BjeqXZPcc2IPvRTXsjBrmdUYau0TfyXfjU0nRnKxooeN8OCHoDKcNuLpCpLtkMfSHiySssKmVbGwba/pwPJGs4qCWCNecmXadttJv84OH8X5f7GkL8Ago147uiizU=
+    on_success: change
+    on_failure: always
