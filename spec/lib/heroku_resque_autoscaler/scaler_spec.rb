@@ -96,6 +96,14 @@ describe HerokuResqueAutoscaler do
       HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_jobs)
       HerokuResqueAutoscalerTestClass.num_desired_heroku_workers.should == 5
     end
+
+    context "when Scaler.job_count returns 0" do
+      it "returns 0" do
+        num_jobs = 0
+        HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_jobs)
+        HerokuResqueAutoscalerTestClass.num_desired_heroku_workers.should == 0
+      end
+    end
   end
 
   context ".after_perform_scale_down" do
