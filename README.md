@@ -17,7 +17,7 @@ Inspired by [@darkhelmet](https://github.com/darkhelmet)'s
 ## Requirements
 
 * ["heroku_api", "~> 0.3.5"](http://rubygems.org/gems/heroku-api)
-* ["resque", "~> 1.23.0"](http://rubygems.org/gems/resque)
+* ["resque", "~> 1.25.1"](http://rubygems.org/gems/resque)
 
 
 ## Installation
