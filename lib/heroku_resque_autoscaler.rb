@@ -55,5 +55,7 @@ module HerokuResqueAutoscaler
         return scale_info[:workers]
       end
     end
+
+    0
   end
 end
