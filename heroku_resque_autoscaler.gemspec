@@ -16,7 +16,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency "heroku-api", "~> 0.3.5"
-  gem.add_dependency "resque", "~> 1.23.0"
+  gem.add_dependency "resque", "~> 1.0"
 
   gem.add_development_dependency "simplecov", "~> 0.7.1"
   gem.add_development_dependency "rspec", "~> 2.11.0"
