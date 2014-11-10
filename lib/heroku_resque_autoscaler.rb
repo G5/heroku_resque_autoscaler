@@ -12,7 +12,7 @@ module HerokuResqueAutoscaler
     ]
 
   class << self
-    # A HerokuResqueAutoscaler configuration object. Must act like a hash and 
+    # A HerokuResqueAutoscaler configuration object. Must act like a hash and
     # return sensible values for all HerokuResqueAutoscaler configuration options.
     #
     # @see HerokuResqueAutoscaler::Configuration.
@@ -46,7 +46,7 @@ module HerokuResqueAutoscaler
 
   def after_perform_scale_down(*args)
     # Scale everything down if we have no pending jobs and one working job (this one)
-    Scaler.workers = 0 if Scaler.job_count.zero? && Scaler.working_job_count == 1
+    Scaler.workers = 0 if Scaler.ready_to_scale_down?
   end
 
   def num_desired_heroku_workers(*args)
@@ -57,5 +57,10 @@ module HerokuResqueAutoscaler
     end
 
     0
+  end
+
+  def on_failure_scale_down(*args)
+    # Scale everything down if we have no pending jobs and one working job (this one)
+    Scaler.workers = 0 if Scaler.ready_to_scale_down?
   end
 end
