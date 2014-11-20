@@ -122,6 +122,22 @@ describe HerokuResqueAutoscaler do
     end
   end
 
+  context ".on_failure_scale_down" do
+    it "scales down the workers to zero if there are no jobs pending" do
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(0)
+      HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(1)
+      HerokuResqueAutoscaler::Scaler.stub(:working_job_count).and_return(1)
+      HerokuResqueAutoscaler::Scaler.should_receive(:workers=).with(0)
+      HerokuResqueAutoscalerTestClass.on_failure_scale_down
+    end
+
+    it "does not scale down the workers if there are jobs pending" do
+      HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(1)
+      HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=)
+      HerokuResqueAutoscalerTestClass.on_failure_scale_down
+    end
+  end
+
   context ".after_enqueue_scale_up" do
     it "ups the amount of workers if there are not enough" do
       num_workers = 5
@@ -148,6 +164,23 @@ describe HerokuResqueAutoscaler do
       HerokuResqueAutoscalerTestClass.stub(:num_desired_heroku_workers).and_return(num_desired_workers)
       HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=)
       HerokuResqueAutoscalerTestClass.after_enqueue_scale_up
+    end
+  end
+
+  context '.ready_to_scale_down?' do
+    context 'when 0 jobs and 1 worker' do
+      it 'is true' do
+        HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(0)
+        HerokuResqueAutoscaler::Scaler.stub(:working_job_count).and_return(1)
+        expect(HerokuResqueAutoscaler::Scaler.ready_to_scale_down?).to eq true
+      end
+    end
+
+    context 'when 1 or more jobs' do
+      it 'is false' do
+        HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(1)
+        expect(HerokuResqueAutoscaler::Scaler.ready_to_scale_down?).to eq false
+      end
     end
   end
 end

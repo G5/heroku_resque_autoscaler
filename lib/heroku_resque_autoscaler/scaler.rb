@@ -33,6 +33,10 @@ module HerokuResqueAutoscaler
       def working_job_count
         Resque.info[:working].to_i
       end
+
+      def ready_to_scale_down?
+        job_count.zero? && working_job_count == 1
+      end
     end
   end
 end
