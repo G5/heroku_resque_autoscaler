@@ -3,6 +3,8 @@ module HerokuResqueAutoscaler
     OPTIONS = {
       heroku_api_key: ENV["HEROKU_API_KEY"],
       heroku_app_name: ENV["HEROKU_APP_NAME"],
+      heroku_max_retry: ENV["HEROKU_MAX_RETRY"] ||= "5",
+      heroku_retry_rate: ENV["HEROKU_RETRY_RATE"] ||= "10"
     }
 
     # Defines accessors for all OPTIONS

@@ -16,10 +16,21 @@ describe HerokuResqueAutoscaler do
     HerokuResqueAutoscaler.configure do |config|
       config.heroku_api_key = "api-key"
       config.heroku_app_name = "app-name"
+      config.heroku_max_retry= "5"
+      config.heroku_retry_rate = "0.1"
     end
   end
 
   let(:heroku_app_name) { "app-name" }
+  let(:api_rate_limit_response) do
+    Excon.stub(method: :get) do |params|
+      { status: 429,
+        body: { "id" => "rate_limit", "error" => "Your account reached the API rate limit" }
+      }
+    end
+    connection = Excon.new("http://example.com", mock: true)
+    connection.request(method: :get)
+  end
 
   context ".api_key" do
     it "returns api key" do
@@ -49,6 +60,13 @@ describe HerokuResqueAutoscaler do
       @heroku.should_receive(:get_ps).with(heroku_app_name).and_return(response)
       HerokuResqueAutoscaler::Scaler.workers.should == 2
     end
+
+    it "retries if the API rate limit is exceeded" do
+      @heroku.stub(:get_ps)
+        .and_raise(::Heroku::API::Errors::RateLimitExceeded.new('message', api_rate_limit_response))
+      @heroku.should_receive(:get_ps).with(heroku_app_name).exactly(5).times
+      lambda { HerokuResqueAutoscaler::Scaler.workers}.should raise_error
+    end
   end
 
   context ".workers=" do
@@ -56,6 +74,13 @@ describe HerokuResqueAutoscaler do
       quantity = 10
       @heroku.should_receive(:post_ps_scale).with(heroku_app_name, :worker, quantity)
       HerokuResqueAutoscaler::Scaler.workers = quantity
+    end
+
+    it "retries if the API rate limit is exceeded" do
+      @heroku.stub(:post_ps_scale)
+        .and_raise(::Heroku::API::Errors::RateLimitExceeded.new('message', api_rate_limit_response))
+      @heroku.should_receive(:post_ps_scale).exactly(5).times
+      lambda { HerokuResqueAutoscaler::Scaler.workers = 0 }.should raise_error
     end
   end
 
