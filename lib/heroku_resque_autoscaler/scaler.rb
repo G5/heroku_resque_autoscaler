@@ -17,13 +17,35 @@ module HerokuResqueAutoscaler
       end
 
       def workers
-        heroku.get_ps(app_name).body.keep_if do |ps|
-          ps["process"] =~ /worker/
-        end.length.to_i
+        tries = 0
+        begin
+          tries += 1
+          heroku.get_ps(app_name).body.keep_if do |ps|
+            ps["process"] =~ /worker/
+          end.length.to_i
+        rescue ::Heroku::API::Errors::RateLimitExceeded => e
+          if tries < HerokuResqueAutoscaler.configuration["heroku_max_retry"].to_i
+            sleep(HerokuResqueAutoscaler.configuration["heroku_retry_rate"].to_f)
+            retry
+          else
+            raise e
+          end
+        end
       end
 
       def workers=(qty)
-        heroku.post_ps_scale(app_name, :worker, qty)
+        tries = 0
+        begin
+          tries += 1
+          heroku.post_ps_scale(app_name, :worker, qty)
+        rescue ::Heroku::API::Errors::RateLimitExceeded => e
+          if tries < HerokuResqueAutoscaler.configuration["heroku_max_retry"].to_i
+            sleep(HerokuResqueAutoscaler.configuration["heroku_retry_rate"].to_f)
+            retry
+          else
+            raise e
+          end
+        end
       end
 
       def job_count
