@@ -141,6 +141,7 @@ describe HerokuResqueAutoscaler do
         num_workers = 5
         num_desired_workers = 6
         HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(num_workers)
+        HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_workers)
         HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=).with(num_desired_workers)
         HerokuResqueAutoscalerTestClass.after_enqueue_scale_up
       end  
