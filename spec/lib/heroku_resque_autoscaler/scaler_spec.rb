@@ -135,13 +135,12 @@ describe HerokuResqueAutoscaler do
 
   context ".after_enqueue_scale_up" do
     context "with max_resque_workers set" do
-      let(:max_resque_workers) { 1 }
+      let(:max_resque_workers) { 5 }
 
       it "scales with a max" do
-        num_workers = 1
-        num_desired_workers = 2
+        num_workers = 5
+        num_desired_workers = 6
         HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(num_workers)
-        HerokuResqueAutoscalerTestClass.stub(:num_desired_heroku_workers).and_return(num_desired_workers)
         HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=).with(num_desired_workers)
         HerokuResqueAutoscalerTestClass.after_enqueue_scale_up
       end  

@@ -3,13 +3,13 @@ require "heroku_resque_autoscaler/configuration"
 require "heroku_resque_autoscaler/scaler"
 
 module HerokuResqueAutoscaler
-    WORKER_SCALE = [
-      { :workers => 1, :job_count => 1 },
-      { :workers => 2, :job_count => 15 },
-      { :workers => 3, :job_count => 25 },
-      { :workers => 4, :job_count => 40 },
-      { :workers => 5, :job_count => 60 }
-    ]
+  DEFAULT_WORKER_SCALE = [
+    { :workers => 1, :job_count => 1 },
+    { :workers => 2, :job_count => 15 },
+    { :workers => 3, :job_count => 25 },
+    { :workers => 4, :job_count => 40 },
+    { :workers => 5, :job_count => 60 }
+  ]
 
   class << self
     # A HerokuResqueAutoscaler configuration object. Must act like a hash and 
@@ -39,7 +39,6 @@ module HerokuResqueAutoscaler
 
   def after_enqueue_scale_up(*args)
     desired_workers = num_desired_heroku_workers
-    return if Scaler.max_resque_workers && desired_workers > Scaler.max_resque_workers
     if Scaler.workers < desired_workers
       Scaler.workers = desired_workers
     end
@@ -51,7 +50,7 @@ module HerokuResqueAutoscaler
   end
 
   def num_desired_heroku_workers(*args)
-    WORKER_SCALE.reverse_each do |scale_info|
+    worker_scale.reverse_each do |scale_info|
       if Scaler.job_count >= scale_info[:job_count]
         return scale_info[:workers]
       end
@@ -59,4 +58,13 @@ module HerokuResqueAutoscaler
 
     0
   end
+
+  private
+
+  def worker_scale
+    ## Respect a max number of workers if this is configured
+    DEFAULT_WORKER_SCALE.reject do |w| 
+      w[:workers] > Scaler.max_resque_workers
+    end  
+  end  
 end

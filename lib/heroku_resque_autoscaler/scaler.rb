@@ -17,7 +17,7 @@ module HerokuResqueAutoscaler
       end
 
       def max_resque_workers
-        return nil unless HerokuResqueAutoscaler.configuration["max_resque_workers"]
+        return Float::INFINITY unless HerokuResqueAutoscaler.configuration["max_resque_workers"]
         HerokuResqueAutoscaler.configuration["max_resque_workers"].to_i
       end
 
