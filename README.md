@@ -69,11 +69,19 @@ class AutoscaledJob
 end
 ```
 
+You can optionally configure a maximum number of workers to scale up to in your configuration block.
+
+```ruby
+HerokuResqueAutoscaler.configure do |config|
+  config.max_resque_workers  = ENV["MAX_RESQUE_WORKERS"] 
+end
+```
 
 ## Authors
 
   * Jessica Lynn Suttles / [@jlsuttles](https://github.com/jlsuttles)
   * Bookis Smuin / [@bookis](https://github.com/bookis)
+  * Chris Stringer / [@jcstringer](https://github.com/jcstringer)
 
 
 ## Contributing

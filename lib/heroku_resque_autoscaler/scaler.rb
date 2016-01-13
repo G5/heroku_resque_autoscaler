@@ -16,6 +16,11 @@ module HerokuResqueAutoscaler
         HerokuResqueAutoscaler.configuration["heroku_app_name"]
       end
 
+      def max_resque_workers
+        return nil unless HerokuResqueAutoscaler.configuration["max_resque_workers"]
+        HerokuResqueAutoscaler.configuration["max_resque_workers"].to_i
+      end
+
       def workers
         heroku.get_ps(app_name).body.keep_if do |ps|
           ps["process"] =~ /worker/

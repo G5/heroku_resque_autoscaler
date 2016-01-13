@@ -39,6 +39,7 @@ module HerokuResqueAutoscaler
 
   def after_enqueue_scale_up(*args)
     desired_workers = num_desired_heroku_workers
+    return if Scaler.max_resque_workers && desired_workers > Scaler.max_resque_workers
     if Scaler.workers < desired_workers
       Scaler.workers = desired_workers
     end

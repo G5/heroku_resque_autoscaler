@@ -11,6 +11,10 @@ describe HerokuResqueAutoscaler::Configuration do
     assert_config_default :heroku_api_key, ENV["HEROKU_API_KEY"]
   end
 
+  it "defaults to no max resque workers" do
+    assert_config_default :max_resque_workers, nil
+  end  
+
   it "allows values to be overwritten" do
     assert_config_overridable :heroku_api_key
   end
