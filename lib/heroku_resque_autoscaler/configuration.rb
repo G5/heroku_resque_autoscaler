@@ -3,6 +3,7 @@ module HerokuResqueAutoscaler
     OPTIONS = {
       heroku_api_key: ENV["HEROKU_API_KEY"],
       heroku_app_name: ENV["HEROKU_APP_NAME"],
+      max_resque_workers: ENV["MAX_RESQUE_WORKERS"]
     }
 
     # Defines accessors for all OPTIONS
@@ -10,7 +11,7 @@ module HerokuResqueAutoscaler
       attr_accessor key
     end
 
-    # Initializes defaults to be the environment varibales of the same names
+    # Initializes defaults to be the environment variables of the same names
     def initialize
       OPTIONS.each_pair do |key, value|
         self.send("#{key}=", value)

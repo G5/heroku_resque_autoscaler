@@ -9,13 +9,16 @@ class HerokuResqueAutoscalerTestClass
 end
 
 describe HerokuResqueAutoscaler do
-  before :each do
+  let(:max_resque_workers) { nil }
+
+  before do
     @heroku = mock(Heroku::API)
     HerokuResqueAutoscaler::Scaler.stub(:heroku).and_return(@heroku)
 
     HerokuResqueAutoscaler.configure do |config|
       config.heroku_api_key = "api-key"
       config.heroku_app_name = "app-name"
+      config.max_resque_workers = max_resque_workers
     end
   end
 
@@ -30,6 +33,14 @@ describe HerokuResqueAutoscaler do
   context ".app_name" do
     it "returns app name" do
       HerokuResqueAutoscaler::Scaler.app_name.should == "app-name"
+    end
+  end
+
+  context ".max_resque_workers" do
+    let(:max_resque_workers) { "2" }
+
+    it "returns a count" do
+      HerokuResqueAutoscaler::Scaler.max_resque_workers.should == 2
     end
   end
 
@@ -123,6 +134,19 @@ describe HerokuResqueAutoscaler do
   end
 
   context ".after_enqueue_scale_up" do
+    context "with max_resque_workers set" do
+      let(:max_resque_workers) { 5 }
+
+      it "scales with a max" do
+        num_workers = 5
+        num_desired_workers = 6
+        HerokuResqueAutoscaler::Scaler.stub(:workers).and_return(num_workers)
+        HerokuResqueAutoscaler::Scaler.stub(:job_count).and_return(num_workers)
+        HerokuResqueAutoscaler::Scaler.should_not_receive(:workers=).with(num_desired_workers)
+        HerokuResqueAutoscalerTestClass.after_enqueue_scale_up
+      end  
+    end  
+
     it "ups the amount of workers if there are not enough" do
       num_workers = 5
       num_desired_workers = 6
